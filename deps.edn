@@ -32,7 +32,7 @@
                 org.babashka/sci {:mvn/version "0.8.40"}
                 org.clojure/test.check {:mvn/version "1.1.1"}
                 same/ish {:mvn/version "0.1.6"}
-                org.apache.commons/commons-numbers-gamma {:mvn/version "1.1"}}
+                org.apache.commons/commons-numbers-gamma {:mvn/version "1.1"}}}
 
   ;; See https://github.com/cognitect-labs/test-runner for invocation
   ;; instructions, or call `clojure -X:test:runner`.
