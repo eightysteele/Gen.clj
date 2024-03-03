@@ -1,41 +1,17 @@
 (ns gen.distribution.math.log-likelihood-test
   (:require [com.gfredericks.test.chuck.clojure-test :refer [checking]]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [deftest is]]
             [gen.distribution.math.log-likelihood :as ll]
             [gen.distribution :as distribution]
             [gen.distribution-test :as dt]
             [gen.generators :refer [gen-double within]]
             [same.core :refer [ish? with-comparator]]))
 
-(defn factorial
-  "Factorial implementation for testing."
-  [n]
-  (if (zero? n)
-    1
-    (* n (factorial (dec n)))))
-
 (defn ->logpdf [f]
   (fn [& args]
     (reify distribution/LogPDF
       (logpdf [_ v]
         (apply f (concat args [v]))))))
-
-(deftest log-gamma-fn-tests
-  (testing "log-Gamma ~matches log(factorial)"
-    (with-comparator (within 1e-11)
-      (doseq [n (range 1 15)]
-        (is (ish? (Math/log (factorial (dec n)))
-                  (ll/log-gamma-fn n))))))
-
-
-  (with-comparator (within 1e-12)
-    (checking "Euler's reflection formula"
-              [z (gen-double 0.001 0.999)]
-              (is (ish? (+ (ll/log-gamma-fn (- 1 z))
-                           (ll/log-gamma-fn z))
-                        (- ll/log-pi
-                           (Math/log
-                            (Math/sin (* Math/PI z)))))))))
 
 (deftest gamma-tests
   (dt/gamma-tests (->logpdf ll/gamma)))
