@@ -45,22 +45,6 @@
                          (+ acc (/ coef x+1))))))]
     (+ tmp (Math/log (* sqrt-2pi (/ ser x))))))
 
-(defn gamma
-  "Returns the log-likelihood of the [Gamma
-  distribution](https://en.wikipedia.org//wiki/Gamma_distribution) parameterized
-  by `shape` and `scale` at the value `v`.
-
-  The implementation follows the algorithm described on the Gamma
-  distribution's [Wikipedia
-  page](https://en.wikipedia.org//wiki/Gamma_distribution#Maximum_likelihood_estimation)."
-  [shape scale v]
-  (if (pos? v)
-    (- (* (dec shape) (Math/log v))
-       (/ v scale)
-       (log-gamma-fn shape)
-       (* shape (Math/log scale)))
-    ##-Inf))
-
 (defn log-beta-fn
   "Returns the natural log of the value of the [Beta
   function](https://en.wikipedia.org/wiki/Beta_function) evaluated at inputs `a`
@@ -69,19 +53,3 @@
   (- (+ (log-gamma-fn a)
         (log-gamma-fn b))
      (log-gamma-fn (+ a b))))
-
-(defn beta
-  "Returns the log-likelihood of the [Beta
-  distribution](https://en.wikipedia.org/wiki/Beta_distribution) parameterized by
-  `alpha` and `beta` at the value `v`.
-
-  The implementation follows the algorithm described on the Beta
-  distribution's [Wikipedia
-  page](https://en.wikipedia.org/wiki/Beta_distribution#Probability_density_function)."
-  [alpha beta v]
-  {:pre [(pos? alpha) (pos? beta)]}
-  (if (< 0 v 1)
-    (- (+ (* (- alpha 1) (Math/log v))
-          (* (- beta 1) (Math/log (- 1 v))))
-       (log-beta-fn alpha beta))
-    ##-Inf))

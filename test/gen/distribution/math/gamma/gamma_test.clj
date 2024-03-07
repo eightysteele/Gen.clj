@@ -12,6 +12,7 @@
 ;; 170! is the max factorial possible in a double
 (def MAX_N_DOUBLE 170)
 
+;; generated with http://maxima.sourceforge.net log_gamma
 (def test-data
   [[0.125 2.019418357553796]
    [0.25 1.288022524698077]
@@ -151,32 +152,61 @@
   (Math/log Math/PI))
 
 (deftest log-gamma-fn-tests
-;; (testing "log-gamma-fn ~matches LogFactorial"
-;;   (with-comparator (within 1e-12)
-;;     (let [log-factorial (LogFactorial/create)]
-;;       (doseq [n (range MAX_N_DOUBLE)]
-;;         (is (ish? (.value log-factorial (dec n))
-;;                   (g/log-gamma-fn n)))))))
-
-  (testing "log-gamma-fn ~matches commons LogGamma"
+  (testing "log-gamma-fn ~matches commons.LogFactorial"
     (with-comparator (within 1e-12)
-      (doseq [[x expected] test-data]
+      (let [log-factorial (LogFactorial/create)]
+        (doseq [n (range MAX_N_DOUBLE)]
+          (is (ish? (.value log-factorial (dec n))
+                    (g/log-gamma-fn n))
+              (str "failed on " n))))))
+
+  (testing "log-gamma-fn ~matches commons.LogGamma"
+    (with-comparator (within 1e-12)
+      (doseq [[x _] test-data]
         (is (ish? (LogGamma/value x)
-                  (g/log-gamma-fn x))))))
-  
-  (testing "log-gamma-fn ~matches kixi log-gamma"
+                  (g/log-gamma-fn x))
+            (str "failed on " x)))))
+
+  (testing "log-gamma-fn ~matches test data"
     (with-comparator (within 1e-12)
       (doseq [[x expected] test-data]
+        (is (ish? expected
+                  (g/log-gamma-fn x))
+            (str "failed on " x)))))
+
+  (testing "commons.LogGamma ~matches test data"
+    (with-comparator (within 1e-12)
+      (doseq [[x expected] test-data]
+        (is (ish? expected
+                  (LogGamma/value x))
+            (str "failed on " x)))))
+
+  (testing "kixi.log-gamma ~matches test data"
+    (with-comparator (within 1e-12)
+      (doseq [[x expected] test-data]
+        (is (ish? expected
+                  (km/log-gamma x))
+            (str "failed on " x)))))
+
+  (testing "log-gamma-fn ~matches kixi.log-gamma"
+    (with-comparator (within 1e-12)
+      (doseq [[x _] test-data]
         (is (ish? (km/log-gamma x)
-                  (g/log-gamma-fn x))))))
+                  (g/log-gamma-fn x))
+            (str "failed on " x)))))
 
-  )
+  (testing "commons.LogGamma ~matches kixi.log-gamma"
+    (with-comparator (within 1e-12)
+      (doseq [[x _] test-data]
+        (is (ish? (km/log-gamma x)
+                  (LogGamma/value x))
+            (str "failed on " x)))))
 
-;; (with-comparator (within 1e-12)
-;;   (checking "Euler's reflection formula"
-;;     [z (gen-double 0.001 0.999)]
-;;     (is (ish? (+ (g/log-gamma-fn (- 1 z))
-;;                  (g/log-gamma-fn z))
-;;               (- log-pi
-;;                  (Math/log
-;;                   (Math/sin (* Math/PI z)))))))))
+(with-comparator (within 1e-12)
+  (checking "Euler's reflection formula"
+    [z (gen-double 0.001 0.999)]
+    (is (ish? (+ (g/log-gamma-fn (- 1 z))
+                 (g/log-gamma-fn z))
+              (- log-pi
+                 (Math/log
+                  (Math/sin (* Math/PI z)))))))))
