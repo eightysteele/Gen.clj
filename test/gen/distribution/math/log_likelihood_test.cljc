@@ -2,6 +2,8 @@
   (:require [com.gfredericks.test.chuck.clojure-test :refer [checking]]
             [clojure.test :refer [deftest is testing]]
             [gen.distribution.math.log-likelihood :as ll]
+            [gen.distribution.math.gamma :as g]
+            [gen.distribution.math.utils :as u]
             [gen.distribution :as distribution]
             [gen.distribution-test :as dt]
             [gen.generators :refer [gen-double within]]
@@ -25,15 +27,15 @@
     (with-comparator (within 1e-11)
       (doseq [n (range 1 15)]
         (is (ish? (Math/log (factorial (dec n)))
-                  (ll/log-gamma-fn n))))))
+                  (g/log-gamma n))))))
 
 
   (with-comparator (within 1e-12)
     (checking "Euler's reflection formula"
               [z (gen-double 0.001 0.999)]
-              (is (ish? (+ (ll/log-gamma-fn (- 1 z))
-                           (ll/log-gamma-fn z))
-                        (- ll/log-pi
+              (is (ish? (+ (g/log-gamma (- 1 z))
+                           (g/log-gamma z))
+                        (- u/log-pi
                            (Math/log
                             (Math/sin (* Math/PI z)))))))))
 
