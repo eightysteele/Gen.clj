@@ -1,21 +1,7 @@
 (ns gen.distribution.math.log-likelihood
   "Log-likelihood implementations for various primitive distributions."
-  (:require [kixi.stats.math :as k]))
-
-(def ^:no-doc log-pi
-  (Math/log Math/PI))
-
-(def ^:no-doc log-2pi
-  (Math/log (* 2 Math/PI)))
-
-(def ^:no-doc sqrt-2pi
-  (Math/sqrt (* 2 Math/PI)))
-
-(defn ^:no-doc log-gamma-fn
-  "Returns the natural log of the value of the [Gamma
-  function](https://en.wikipedia.org/wiki/Gamma_function) evaluated at `x`"
-  [x]
-  (k/log-gamma x))
+  (:require [gen.distribution.math.utils :as u]
+            [gen.distribution.math.gamma :as g]))
 
 (defn gamma
   "Returns the log-likelihood of the [Gamma
@@ -29,7 +15,7 @@
   (if (pos? v)
     (- (* (dec shape) (Math/log v))
        (/ v scale)
-       (log-gamma-fn shape)
+       (g/log-gamma shape)
        (* shape (Math/log scale)))
     ##-Inf))
 
@@ -38,9 +24,9 @@
   function](https://en.wikipedia.org/wiki/Beta_function) evaluated at inputs `a`
   and `b`."
   [a b]
-  (- (+ (log-gamma-fn a)
-        (log-gamma-fn b))
-     (log-gamma-fn (+ a b))))
+  (- (+ (g/log-gamma a)
+        (g/log-gamma b))
+     (g/log-gamma (+ a b))))
 
 (defn beta
   "Returns the log-likelihood of the [Beta
@@ -67,10 +53,12 @@
   (Math/log (if v p (- 1.0 p))))
 
 (defn binomial
-  "Returns the log-likelihood of a [Binomial
-  distribution](https://en.wikipedia.org/wiki/Binomial_distribution)
-  parameterized by `n` (number of trials) and `p` (probability of success in
-  each trial) at the value `v` (number of successes)."
+  "Returns the log-likelihood of a binomial distribution parameterized by the
+  number of trials `n`, the probability of success in each trial `p`, and the
+  number of successes `v`.
+
+  The implementation follows the algorithm described by the probability mass
+  function in https://en.wikipedia.org/wiki/Binomial_distribution."
   [n p v]
   {:pre [(integer? n)
          (integer? v)
@@ -79,7 +67,7 @@
          (<= 0 p 1)]}
   (letfn [(log-fact
             [x]
-            (log-gamma-fn (inc x)))
+            (g/log-gamma (inc x)))
           (log-bico
             [n k]
             (if (or (zero? k) (= k n))
@@ -107,7 +95,7 @@
   [location scale v]
   (let [normalized (/ (- v location) scale)
         norm**2    (* normalized normalized)]
-    (- (- log-pi)
+    (- (- u/log-pi)
        (Math/log scale)
        (Math/log (+ 1 norm**2)))))
 
@@ -160,7 +148,7 @@
   $$"
   [mu sigma v]
   (let [v-mu:sigma (/ (- v mu) sigma)]
-    (* -0.5 (+ log-2pi
+    (* -0.5 (+ u/log-2pi
                (* 2 (Math/log sigma))
                (* v-mu:sigma
                   v-mu:sigma)))))
@@ -192,8 +180,8 @@
          half-inc-nu (* 0.5 inc-nu)
          normalized  (/ (- v location) scale)
          norm**2     (* normalized normalized)]
-     (- (log-gamma-fn half-inc-nu)
-        (log-gamma-fn (* 0.5 nu))
+     (- (g/log-gamma half-inc-nu)
+        (g/log-gamma (* 0.5 nu))
         (Math/log scale)
-        (* 0.5 (+ log-pi (Math/log nu)))
+        (* 0.5 (+ u/log-pi (Math/log nu)))
         (* half-inc-nu (Math/log (inc (/ norm**2 nu))))))))
